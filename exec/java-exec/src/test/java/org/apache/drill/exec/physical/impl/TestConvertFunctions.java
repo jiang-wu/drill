@@ -25,11 +25,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.drill.test.BaseTestQuery;
-import org.apache.drill.test.QueryTestUtil;
 import org.apache.drill.categories.UnlikelyTest;
 import org.apache.drill.exec.ExecConstants;
 import org.apache.drill.exec.compile.ClassTransformer.ScalarReplacementOption;
@@ -38,25 +38,27 @@ import org.apache.drill.exec.expr.fn.impl.DateUtility;
 import org.apache.drill.exec.proto.UserBitShared.QueryType;
 import org.apache.drill.exec.record.RecordBatchLoader;
 import org.apache.drill.exec.rpc.RpcException;
-import org.apache.drill.exec.rpc.user.QueryDataBatch;
 import org.apache.drill.exec.rpc.UserClientConnection;
+import org.apache.drill.exec.rpc.user.QueryDataBatch;
 import org.apache.drill.exec.server.DrillbitContext;
 import org.apache.drill.exec.server.options.OptionValue;
 import org.apache.drill.exec.util.ByteBufUtil.HadoopWritables;
 import org.apache.drill.exec.util.VectorUtil;
 import org.apache.drill.exec.vector.ValueVector;
 import org.apache.drill.exec.vector.VarCharVector;
+import org.apache.drill.test.BaseTestQuery;
+import org.apache.drill.test.QueryTestUtil;
 import org.joda.time.DateTime;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
 import io.netty.buffer.DrillBuf;
 import mockit.Injectable;
-import org.junit.experimental.categories.Category;
 
 @Category(UnlikelyTest.class)
 public class TestConvertFunctions extends BaseTestQuery {
@@ -69,8 +71,8 @@ public class TestConvertFunctions extends BaseTestQuery {
   private static final String DATE_TIME_BE = "\\x00\\x00\\x00\\x49\\x77\\x85\\x1f\\x8e";
   private static final String DATE_TIME_LE = "\\x8e\\x1f\\x85\\x77\\x49\\x00\\x00\\x00";
 
-  private static DateTime time = DateTime.parse("01:23:45.678", DateUtility.getTimeFormatter());
-  private static DateTime date = DateTime.parse("1980-01-01", DateUtility.getDateTimeFormatter());
+  private static Time time = new Time(DateTime.parse("01:23:45.678", DateUtility.getTimeFormatter()).getMillis());
+  private static Date date = new Date(DateTime.parse("1980-01-01", DateUtility.getDateTimeFormatter()).getMillis());
 
   String textFileContent;
 
