@@ -80,7 +80,7 @@ public class TestNestedDateTimeTimestamp extends BaseTestQuery {
               .build()
               .run();
     }
-    
+
     /**
      * Test the textual display to make sure it is consistent with actual JSON output
      */
@@ -89,13 +89,13 @@ public class TestNestedDateTimeTimestamp extends BaseTestQuery {
         List<QueryDataBatch> resultList = testSqlWithResults(String.format("select * from %s limit 1", DATAFILE));
         String actual = getResultString(resultList, " | ");
 
-        final String expected = 
+        final String expected =
                 "date | time | timestamp | date_list | time_list | timestamp_list | time_map\n" +
                 "1970-01-11 | 00:00:03 | 2018-03-21 20:30:07.364 | [\"1970-01-11\"] | [\"00:00:03.600\"] | [\"2018-03-21 20:30:07.364\"] | {\"date\":\"1970-01-11\",\"time\":\"00:00:03.600\",\"timestamp\":\"2018-03-21 20:30:07.364\"}";
 
         Assert.assertEquals(expected.trim(), actual.trim());
     }
-    
+
     /**
      * Test the json output is consistent as before
      */
@@ -123,7 +123,7 @@ public class TestNestedDateTimeTimestamp extends BaseTestQuery {
           test("alter session reset store.json.extended_types ");
         }
     }
-    
+
     /**
      * Test the extended json output is consistent as before
      */
@@ -151,7 +151,7 @@ public class TestNestedDateTimeTimestamp extends BaseTestQuery {
           test("alter session reset store.json.extended_types ");
         }
     }
-    
+
     /**
      * Test parquet output is consistent as before
      */
