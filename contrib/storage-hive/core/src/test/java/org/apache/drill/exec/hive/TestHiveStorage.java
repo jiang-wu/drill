@@ -19,14 +19,10 @@ package org.apache.drill.exec.hive;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -42,38 +38,29 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hive.common.type.HiveVarchar;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.rules.ExpectedException;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 @Category({SlowTest.class, HiveStorageTest.class})
 public class TestHiveStorage extends HiveTestBase {
+
   @BeforeClass
-  public static void setupOptions() throws Exception {
-    test(String.format("alter session set `%s` = true", PlannerSettings.ENABLE_DECIMAL_DATA_TYPE_KEY));
+  public static void init() {
+    setSessionOption(PlannerSettings.ENABLE_DECIMAL_DATA_TYPE_KEY, true);
   }
 
-  @Test // DRILL-4083
-  public void testNativeScanWhenNoColumnIsRead() throws Exception {
-    try {
-      test(String.format("alter session set `%s` = true", ExecConstants.HIVE_OPTIMIZE_SCAN_WITH_NATIVE_READERS));
-
-      String query = "SELECT count(*) as col FROM hive.countStar_Parquet";
-      testPhysicalPlan(query, "hive-drill-native-parquet-scan");
-
-      testBuilder()
-          .sqlQuery(query)
-          .unOrdered()
-          .baselineColumns("col")
-          .baselineValues(200L)
-          .go();
-    } finally {
-      test("alter session reset `%s`",
-          ExecConstants.HIVE_OPTIMIZE_SCAN_WITH_NATIVE_READERS);
-    }
+  @AfterClass
+  public static void cleanup() {
+    resetSessionOption(PlannerSettings.ENABLE_DECIMAL_DATA_TYPE_KEY);
   }
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   @Test
   public void hiveReadWithDb() throws Exception {
@@ -403,19 +390,7 @@ public class TestHiveStorage extends HiveTestBase {
         .go();
   }
 
-  @Test // DRILL-3938
-  public void nativeReaderIsDisabledForAlteredPartitionedTable() throws Exception {
-    try {
-      test(String.format("alter session set `%s` = true", ExecConstants.HIVE_OPTIMIZE_SCAN_WITH_NATIVE_READERS));
-      final String query = "EXPLAIN PLAN FOR SELECT key, `value`, newcol FROM hive.kv_parquet ORDER BY key LIMIT 1";
 
-      // Make sure the HiveScan in plan has no native parquet reader
-      final String planStr = getPlanInString(query, JSON_FORMAT);
-      assertFalse("Hive native is not expected in the plan", planStr.contains("hive-drill-native-parquet-scan"));
-    } finally {
-      test(String.format("alter session set `%s` = false", ExecConstants.HIVE_OPTIMIZE_SCAN_WITH_NATIVE_READERS));
-    }
-  }
 
   @Test // DRILL-3739
   public void readingFromStorageHandleBasedTable() throws Exception {
@@ -425,22 +400,6 @@ public class TestHiveStorage extends HiveTestBase {
         .baselineColumns("key", "value")
         .expectsEmptyResultSet()
         .go();
-  }
-
-  @Test // DRILL-3739
-  public void readingFromStorageHandleBasedTable2() throws Exception {
-    try {
-      test(String.format("alter session set `%s` = true", ExecConstants.HIVE_OPTIMIZE_SCAN_WITH_NATIVE_READERS));
-
-      testBuilder()
-          .sqlQuery("SELECT * FROM hive.kv_sh ORDER BY key LIMIT 2")
-          .ordered()
-          .baselineColumns("key", "value")
-          .expectsEmptyResultSet()
-          .go();
-    } finally {
-      test(String.format("alter session set `%s` = false", ExecConstants.HIVE_OPTIMIZE_SCAN_WITH_NATIVE_READERS));
-    }
   }
 
   @Test // DRILL-3688
@@ -481,23 +440,20 @@ public class TestHiveStorage extends HiveTestBase {
         .go();
   }
 
-  @Test // DRILL-3688
-  public void testIncorrectHeaderFooterProperty() throws Exception {
-    Map<String, String> testData = ImmutableMap.<String, String>builder()
-        .put("hive.skipper.kv_incorrect_skip_header","skip.header.line.count")
-        .put("hive.skipper.kv_incorrect_skip_footer", "skip.footer.line.count")
-        .build();
+  @Test
+  public void testIncorrectHeaderProperty() throws Exception {
+    String query = "select * from hive.skipper.kv_incorrect_skip_header";
+    thrown.expect(UserRemoteException.class);
+    thrown.expectMessage(containsString("Hive table property skip.header.line.count value 'A' is non-numeric"));
+    test(query);
+  }
 
-    String query = "select * from %s";
-    String exceptionMessage = "Hive table property %s value 'A' is non-numeric";
-
-    for (Map.Entry<String, String> entry : testData.entrySet()) {
-      try {
-        test(String.format(query, entry.getKey()));
-      } catch (UserRemoteException e) {
-        assertThat(e.getMessage(), containsString(String.format(exceptionMessage, entry.getValue())));
-      }
-    }
+  @Test
+  public void testIncorrectFooterProperty() throws Exception {
+    String query = "select * from hive.skipper.kv_incorrect_skip_footer";
+    thrown.expect(UserRemoteException.class);
+    thrown.expectMessage(containsString("Hive table property skip.footer.line.count value 'A' is non-numeric"));
+    test(query);
   }
 
   @Test
@@ -572,6 +528,7 @@ public class TestHiveStorage extends HiveTestBase {
   @Test
   public void testPhysicalPlanSubmission() throws Exception {
     PlanTestBase.testPhysicalPlanExecutionBasedOnQuery("select * from hive.kv");
+    PlanTestBase.testPhysicalPlanExecutionBasedOnQuery("select * from hive.readtest");
   }
 
   private void verifyColumnsMetadata(List<UserProtos.ResultColumnMetadata> columnsList, Map<String, Integer> expectedResult) {
@@ -583,10 +540,5 @@ public class TestHiveStorage extends HiveTestBase {
       assertEquals("Precision should match", expectedSize.intValue(), columnMetadata.getPrecision());
       assertTrue("Column should be nullable", columnMetadata.getIsNullable());
     }
-  }
-
-  @AfterClass
-  public static void shutdownOptions() throws Exception {
-    test(String.format("alter session set `%s` = false", PlannerSettings.ENABLE_DECIMAL_DATA_TYPE_KEY));
   }
 }
