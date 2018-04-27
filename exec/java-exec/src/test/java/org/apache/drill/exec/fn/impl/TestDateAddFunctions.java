@@ -64,9 +64,9 @@ public class TestDateAddFunctions extends BaseTestQuery {
       .sqlQuery(query)
       .unOrdered()
       .baselineColumns("col1", "col2", "col3")
-      .baselineValues(LocalDateTime.parse("2015-04-24", DateUtility.getDateTimeFormatter()),
-                      LocalDateTime.parse("2015-06-24", DateUtility.getDateTimeFormatter()),
-                      LocalDateTime.parse("2020-01-24", DateUtility.getDateTimeFormatter()))
+      .baselineValues(DateUtility.parseBest("2015-04-24"),
+                      DateUtility.parseBest("2015-06-24"),
+                      DateUtility.parseBest("2020-01-24"))
       .go();
   }
 

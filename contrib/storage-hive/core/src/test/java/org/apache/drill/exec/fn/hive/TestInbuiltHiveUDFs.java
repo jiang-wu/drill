@@ -18,6 +18,7 @@
 package org.apache.drill.exec.fn.hive;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -171,7 +172,7 @@ public class TestInbuiltHiveUDFs extends HiveTestBase {
         .sqlQuery("select from_utc_timestamp('1970-01-01 08:00:00','PST') as PST_TIMESTAMP from (VALUES(1))")
         .unOrdered()
         .baselineColumns("PST_TIMESTAMP")
-        .baselineValues(new Timestamp(DateTime.parse("1970-01-01T00:00:00.0").getMillis()))
+        .baselineValues(LocalDateTime.parse("1970-01-01T00:00:00.0"))
         .go();
   }
 
@@ -181,7 +182,7 @@ public class TestInbuiltHiveUDFs extends HiveTestBase {
         .sqlQuery("select to_utc_timestamp('1970-01-01 00:00:00','PST') as UTC_TIMESTAMP from (VALUES(1))")
         .unOrdered()
         .baselineColumns("UTC_TIMESTAMP")
-        .baselineValues(new Timestamp(DateTime.parse("1970-01-01T08:00:00.0").getMillis()))
+        .baselineValues(LocalDateTime.parse("1970-01-01T08:00:00.0"))
         .go();
   }
 

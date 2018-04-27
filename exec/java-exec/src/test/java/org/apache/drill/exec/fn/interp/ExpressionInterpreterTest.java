@@ -20,7 +20,9 @@ package org.apache.drill.exec.fn.interp;
 import static org.junit.Assert.assertEquals;
 
 import java.nio.ByteBuffer;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.apache.drill.categories.SlowTest;
@@ -141,7 +143,7 @@ public class ExpressionInterpreterTest  extends PopUnitTestBase {
     final ByteBuffer buffer = ByteBuffer.allocate(12);
     buffer.putLong(out.value);
     final long l = buffer.getLong(0);
-    final Timestamp t = new Timestamp(l);
+    final LocalDateTime t = Instant.ofEpochMilli(l).atZone(ZoneOffset.systemDefault()).toLocalDateTime();
 
     final String[] expectedFirstTwoValues = {t.toString(), t.toString()};
 
