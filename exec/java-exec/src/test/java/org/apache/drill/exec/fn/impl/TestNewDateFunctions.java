@@ -17,7 +17,7 @@
  */
 package org.apache.drill.exec.fn.impl;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 import org.apache.drill.categories.SqlFunctionTest;
 import org.apache.drill.categories.UnlikelyTest;
@@ -55,9 +55,9 @@ public class TestNewDateFunctions extends BaseTestQuery {
         .sqlQuery("select case when isdate(date1) then cast(date1 as date) else null end res1 from " + dateValues)
         .unOrdered()
         .baselineColumns("res1")
-        .baselineValues(new Date(new DateTime(1900, 1, 1, 0, 0).getMillis()))
-        .baselineValues(new Date(new DateTime(3500, 1, 1, 0, 0).getMillis()))
-        .baselineValues(new Date(new DateTime(2000, 12, 31, 0, 0).getMillis()))
+        .baselineValues(LocalDate.of(1900, 1, 1))
+        .baselineValues(LocalDate.of(3500, 1, 1))
+        .baselineValues(LocalDate.of(2000, 12, 31))
         .baselineValues(new Object[] {null})
         .baselineValues(new Object[] {null})
         .baselineValues(new Object[] {null})

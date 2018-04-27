@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 
 import org.apache.drill.test.BaseTestQuery;
@@ -79,7 +80,7 @@ public class TestBsonRecordReader extends BaseTestQuery {
     writer.reset();
     bsonReader.write(writer, new BsonDocumentReader(bsonDoc));
     SingleMapReaderImpl mapReader = (SingleMapReaderImpl) writer.getMapVector().getReader();
-    assertEquals(1000000l, mapReader.reader("ts").readTimestamp().getTime());
+    assertEquals(1000000l, mapReader.reader("ts").readLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli());
   }
 
   @Test
@@ -202,7 +203,7 @@ public class TestBsonRecordReader extends BaseTestQuery {
     writer.reset();
     bsonReader.write(writer, new BsonDocumentReader(bsonDoc));
     SingleMapReaderImpl mapReader = (SingleMapReaderImpl) writer.getMapVector().getReader();
-    assertEquals(5262729712L, mapReader.reader("dateTimeKey").readTimestamp().getTime());
+    assertEquals(5262729712L, mapReader.reader("dateTimeKey").readLocalDateTime().toInstant(ZoneOffset.UTC).toEpochMilli());
   }
 
   @Test

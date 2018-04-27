@@ -21,9 +21,9 @@ import static org.apache.drill.exec.planner.logical.DrillOptiq.isLiteralNull;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.apache.calcite.plan.RelOptCluster;
@@ -201,7 +201,7 @@ public abstract class DrillValuesRelBase extends Values implements DrillRelNode 
         if (isLiteralNull(literal)) {
           out.writeDateNull();
         } else {
-          out.writeDate(new Date(new DateTime(literal.getValue()).getMillis()));
+          out.writeDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(new DateTime(literal.getValue()).getMillis()), ZoneOffset.UTC).toLocalDate());
         }
         return;
 
@@ -209,7 +209,7 @@ public abstract class DrillValuesRelBase extends Values implements DrillRelNode 
         if (isLiteralNull(literal)) {
           out.writeTimeNull();
         } else {
-          out.writeTime(new Time(new DateTime(literal.getValue()).getMillis()));
+          out.writeTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(new DateTime(literal.getValue()).getMillis()), ZoneOffset.UTC).toLocalTime());
         }
         return;
 
@@ -217,7 +217,7 @@ public abstract class DrillValuesRelBase extends Values implements DrillRelNode 
         if (isLiteralNull(literal)) {
           out.writeTimestampNull();
         } else {
-          out.writeTimestamp(new Timestamp(new DateTime(literal.getValue()).getMillis()));
+          out.writeTimestamp(LocalDateTime.ofInstant(Instant.ofEpochMilli(new DateTime(literal.getValue()).getMillis()), ZoneOffset.UTC));
         }
         return;
 

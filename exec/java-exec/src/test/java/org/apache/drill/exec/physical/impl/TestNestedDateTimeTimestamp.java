@@ -20,13 +20,19 @@ package org.apache.drill.exec.physical.impl;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.drill.exec.expr.fn.impl.DateUtility;
 import org.apache.drill.exec.rpc.user.QueryDataBatch;
 import org.apache.drill.test.BaseTestQuery;
+import org.apache.drill.test.TestBuilder;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,7 +46,7 @@ public class TestNestedDateTimeTimestamp extends BaseTestQuery {
 
     static {
         /**
-         * Data in the parquet file represents this equavilent JSON, but with typed data, time, and timestamps:
+         * Data in the parquet file represents this equivalent JSON, but with typed data, time, and timestamps:
          * {
          *    "date" : "1970-01-11",
          *    "time" : "00:00:03.600",
@@ -60,9 +66,9 @@ public class TestNestedDateTimeTimestamp extends BaseTestQuery {
          * changes the timestamp, if the time zone is not UTC.
          */
 
-        Date date = Date.valueOf("1970-01-11");
-        Time time = new Time(Timestamp.valueOf("1970-01-01 00:00:03.600").getTime());
-        Timestamp timestamp = Timestamp.valueOf("2018-03-23 17:40:52.123");
+        LocalDate date = DateUtility.parseLocalDate("1970-01-11");
+        LocalTime time = DateUtility.parseLocalTime("00:00:03.600");
+        LocalDateTime timestamp = DateUtility.parseLocalDateTime("2018-03-23 17:40:52.123");
         expectedRecord.put("`date`", date);
         expectedRecord.put("`time`", time);
         expectedRecord.put("`timestamp`", timestamp);
@@ -102,7 +108,7 @@ public class TestNestedDateTimeTimestamp extends BaseTestQuery {
 
         final String expected =
                 "date | time | timestamp | date_list | time_list | timestamp_list | time_map\n" +
-                "1970-01-11 | 00:00:03 | 2018-03-23 17:40:52.123 | [\"1970-01-11\"] | [\"00:00:03.600\"] | [\"2018-03-23 17:40:52.123\"] | {\"date\":\"1970-01-11\",\"time\":\"00:00:03.600\",\"timestamp\":\"2018-03-23 17:40:52.123\"}";
+                "1970-01-11 | 00:00:03.600 | 2018-03-23 17:40:52.123 | [\"1970-01-11\"] | [\"00:00:03.600\"] | [\"2018-03-23 17:40:52.123\"] | {\"date\":\"1970-01-11\",\"time\":\"00:00:03.600\",\"timestamp\":\"2018-03-23 17:40:52.123\"}";
 
         Assert.assertEquals(expected.trim(), actual.trim());
     }
@@ -208,5 +214,41 @@ public class TestNestedDateTimeTimestamp extends BaseTestQuery {
             System.out.println("  time1 = " + time1.toString().substring(0,23) + "\n  time2 = " + time2.toString().substring(0,23) + "\n  time3 = " + time3.toString().substring(0,23));
 
         }
+    }
+
+
+    @Test
+    public void testDateUtilityParser() {
+        Date date = Date.valueOf("1970-01-01");
+        Time time = new Time(Timestamp.valueOf("1970-01-01 00:00:00.000").getTime());
+        Timestamp timestamp = Timestamp.valueOf("1970-01-01 00:00:00.000");
+
+        System.out.println(date + " - offset: " + date.getTime());
+        System.out.println(time + " - offset: " + time.getTime());
+        System.out.println(timestamp + " - offset: " + timestamp.getTime());
+
+        Timestamp timestamp2 = TestBuilder.convertToLocalTimestamp("1970-01-01 00:00:00.000");
+        System.out.println(timestamp2 + " - offset: " + timestamp2.getTime());
+
+        LocalDateTime timestamp3 = TestBuilder.convertToLocalDateTime("1970-01-01 00:00:00.000");
+        System.out.println(timestamp3 );
+
+        String in[] = new String[] {
+                "1970-01-01",
+                "1970-01-01 20:12:32",
+                "1970-01-01 20:12:32.32",
+                "1970-01-01 20:12:32.032",
+                "1970-01-01 20:12:32.32 +0800",
+                "1970-1-01",
+                "1970-01-1 2:12:32",
+                "1970-01-01 20:12:3.32",
+                "1970-01-01 20:12:32.032",
+                "1970-01-01 20:2:32.32 +0800"
+        };
+        for (String i : in) {
+            LocalDateTime parsed = DateUtility.parseBest(i);
+            System.out.println(i + "==>" + parsed );
+        }
+
     }
 }

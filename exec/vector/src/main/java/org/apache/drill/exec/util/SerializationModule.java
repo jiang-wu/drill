@@ -18,12 +18,11 @@
 package org.apache.drill.exec.util;
 
 import java.io.IOException;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,35 +37,34 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 public class SerializationModule {
 
     // copied from DateUtility.  Added here for inclusion into drill-jdbc-all
-    public static final DateTimeFormatter formatDate        = DateTimeFormat.forPattern("yyyy-MM-dd");
-    public static final DateTimeFormatter formatTimeStamp    = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS");
-    public static final DateTimeFormatter formatTimeStampTZ = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS ZZZ");
-    public static final DateTimeFormatter formatTime        = DateTimeFormat.forPattern("HH:mm:ss.SSS");
+    public static final DateTimeFormatter formatDate        = DateTimeFormatter.ofPattern("uuuu-MM-dd").withZone(ZoneOffset.UTC);
+    public static final DateTimeFormatter formatTimeStamp    = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss.SSS").withZone(ZoneOffset.UTC);
+    public static final DateTimeFormatter formatTime        = DateTimeFormatter.ofPattern("HH:mm:ss.SSS").withZone(ZoneOffset.UTC);
 
     public static final SimpleModule drillModule = new SimpleModule("DrillModule");
 
     static {
-        drillModule.addSerializer(Time.class, new JsonSerializer<Time>() {
+        drillModule.addSerializer(LocalTime.class, new JsonSerializer<LocalTime>() {
             @Override
-            public void serialize(Time value, JsonGenerator gen, SerializerProvider serializers)
+            public void serialize(LocalTime value, JsonGenerator gen, SerializerProvider serializers)
                     throws IOException, JsonProcessingException {
-                gen.writeString(formatTime.print(value.getTime()));
+                gen.writeString(formatTime.format(value));
             }
         });
 
-        drillModule.addSerializer(Date.class, new JsonSerializer<Date>() {
+        drillModule.addSerializer(LocalDate.class, new JsonSerializer<LocalDate>() {
             @Override
-            public void serialize(Date value, JsonGenerator gen, SerializerProvider serializers)
+            public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider serializers)
                     throws IOException, JsonProcessingException {
-                gen.writeString(formatDate.print(value.getTime()));
+                gen.writeString(formatDate.format(value));
             }
         });
 
-        drillModule.addSerializer(Timestamp.class, new JsonSerializer<Timestamp>() {
+        drillModule.addSerializer(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
             @Override
-            public void serialize(Timestamp value, JsonGenerator gen, SerializerProvider serializers)
+            public void serialize(LocalDateTime value, JsonGenerator gen, SerializerProvider serializers)
                     throws IOException, JsonProcessingException {
-                gen.writeString(formatTimeStamp.print(value.getTime()));
+                gen.writeString(formatTimeStamp.format(value));
             }
         });
     }

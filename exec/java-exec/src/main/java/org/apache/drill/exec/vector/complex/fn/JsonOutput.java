@@ -19,9 +19,9 @@ package org.apache.drill.exec.vector.complex.fn;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAccessor;
 
 import org.apache.drill.exec.vector.complex.reader.FieldReader;
 import org.joda.time.Period;
@@ -54,9 +54,9 @@ public interface JsonOutput {
   void writeVar16Char(String value) throws IOException;
   void writeBinary(byte[] value) throws IOException;
   void writeBoolean(boolean value) throws IOException;
-  void writeDate(Date value) throws IOException;
-  void writeTime(Time value) throws IOException;
-  void writeTimestamp(Timestamp value) throws IOException;
+  void writeDate(TemporalAccessor value) throws IOException;
+  void writeTime(TemporalAccessor value) throws IOException;
+  void writeTimestamp(TemporalAccessor value) throws IOException;
   void writeInterval(Period value) throws IOException;
   void writeDecimalNull() throws IOException;
   void writeTinyIntNull() throws IOException;

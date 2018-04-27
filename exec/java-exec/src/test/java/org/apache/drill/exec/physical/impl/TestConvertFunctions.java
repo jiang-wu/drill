@@ -25,8 +25,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.sql.Date;
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,8 +68,8 @@ public class TestConvertFunctions extends BaseTestQuery {
   private static final String DATE_TIME_BE = "\\x00\\x00\\x00\\x49\\x77\\x85\\x1f\\x8e";
   private static final String DATE_TIME_LE = "\\x8e\\x1f\\x85\\x77\\x49\\x00\\x00\\x00";
 
-  private static Time time = new Time(DateTime.parse("01:23:45.678", DateUtility.getTimeFormatter()).getMillis());
-  private static Date date = new Date(DateTime.parse("1980-01-01", DateUtility.getDateTimeFormatter()).getMillis());
+  private static LocalTime time = LocalTime.parse("01:23:45.678", DateUtility.getTimeFormatter());
+  private static LocalDate date = LocalDate.parse("1980-01-01", DateUtility.getDateTimeFormatter());
 
   String textFileContent;
 

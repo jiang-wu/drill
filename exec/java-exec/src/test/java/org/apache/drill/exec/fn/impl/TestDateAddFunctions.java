@@ -17,13 +17,13 @@
  */
 package org.apache.drill.exec.fn.impl;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.apache.drill.categories.SqlFunctionTest;
 import org.apache.drill.categories.UnlikelyTest;
+import org.apache.drill.exec.expr.fn.impl.DateUtility;
 import org.apache.drill.test.BaseTestQuery;
-import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -44,12 +44,12 @@ public class TestDateAddFunctions extends BaseTestQuery {
       .sqlQuery(query)
       .unOrdered()
       .baselineColumns("col1", "col2", "col3", "col4", "col5", "col6")
-      .baselineValues(new Timestamp(DateTime.parse("2015-01-27T07:27:05.0").getMillis()),
-                      new Timestamp(DateTime.parse("2015-01-29T07:27:05.0").getMillis()),
-                      new Timestamp(DateTime.parse("2015-01-24T12:27:05.0").getMillis()),
-                      new Timestamp(DateTime.parse("2015-01-24T07:32:05.0").getMillis()),
-                      new Timestamp(DateTime.parse("2015-01-24T07:27:10.0").getMillis()),
-                      new Timestamp(DateTime.parse("2015-01-29T17:47:35.0").getMillis()))
+      .baselineValues(LocalDateTime.parse("2015-01-27T07:27:05.0"),
+                      LocalDateTime.parse("2015-01-29T07:27:05.0"),
+                      LocalDateTime.parse("2015-01-24T12:27:05.0"),
+                      LocalDateTime.parse("2015-01-24T07:32:05.0"),
+                      LocalDateTime.parse("2015-01-24T07:27:10.0"),
+                      LocalDateTime.parse("2015-01-29T17:47:35.0"))
       .go();
   }
 
@@ -64,9 +64,9 @@ public class TestDateAddFunctions extends BaseTestQuery {
       .sqlQuery(query)
       .unOrdered()
       .baselineColumns("col1", "col2", "col3")
-      .baselineValues(new Date(DateTime.parse("2015-04-24").getMillis()),
-                      new Date(DateTime.parse("2015-06-24").getMillis()),
-                      new Date(DateTime.parse("2020-01-24").getMillis()))
+      .baselineValues(LocalDateTime.parse("2015-04-24", DateUtility.getDateTimeFormatter()),
+                      LocalDateTime.parse("2015-06-24", DateUtility.getDateTimeFormatter()),
+                      LocalDateTime.parse("2020-01-24", DateUtility.getDateTimeFormatter()))
       .go();
   }
 
@@ -80,8 +80,8 @@ public class TestDateAddFunctions extends BaseTestQuery {
       .sqlQuery(query)
       .unOrdered()
       .baselineColumns("col1", "col2")
-      .baselineValues(new Date(DateTime.parse("2015-01-27").getMillis()),
-                      new Date(DateTime.parse("2015-01-29").getMillis()))
+      .baselineValues(LocalDate.parse("2015-01-27"),
+                      LocalDate.parse("2015-01-29"))
       .go();
   }
 }

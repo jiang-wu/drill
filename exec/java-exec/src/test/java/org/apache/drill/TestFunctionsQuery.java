@@ -21,13 +21,14 @@ import static org.apache.drill.exec.expr.fn.impl.DateUtility.formatDate;
 import static org.apache.drill.exec.expr.fn.impl.DateUtility.formatTimeStamp;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import org.apache.drill.categories.SqlFunctionTest;
 import org.apache.drill.exec.planner.physical.PlannerSettings;
 import org.apache.drill.test.BaseTestQuery;
-import org.joda.time.DateTime;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -551,12 +552,12 @@ public class TestFunctionsQuery extends BaseTestQuery {
         "timestamp '2008-2-23 12:23:23' as TS " +
         "FROM cp.`tpch/region.parquet` limit 1";
 
-    DateTime date = formatTimeStamp.parseDateTime("2008-02-23 12:23:23.0");
+    LocalDateTime date = LocalDateTime.parse("2008-02-23 12:23:23.0", formatTimeStamp);
     testBuilder()
         .sqlQuery(query)
         .unOrdered()
         .baselineColumns("TS")
-        .baselineValues(new Timestamp(date.getMillis()))
+        .baselineValues(date)
         .go();
   }
 
@@ -693,7 +694,7 @@ public class TestFunctionsQuery extends BaseTestQuery {
         "To_DaTe('2003/07/09', 'yyyy/MM/dd') as col3 " +
         "from cp.`employee.json` LIMIT 1";
 
-    Date date = new Date(formatDate.parseDateTime("2003-07-09").getMillis());
+    LocalDate date = LocalDate.parse("2003-07-09");
 
     testBuilder()
         .sqlQuery(query)
@@ -760,8 +761,8 @@ public class TestFunctionsQuery extends BaseTestQuery {
     String query = "select to_timestamp(cast('800120400.12312' as decimal(38, 5))) as DEC38_TS, to_timestamp(200120400) as INT_TS " +
         "from cp.`employee.json` where employee_id < 2";
 
-    Timestamp result1 = new Timestamp(800120400123l);
-    Timestamp result2 = new Timestamp(200120400000l);
+    LocalDateTime result1 = Instant.ofEpochMilli(800120400123l).atZone(ZoneOffset.systemDefault()).toLocalDateTime();
+    LocalDateTime result2 = Instant.ofEpochMilli(200120400000l).atZone(ZoneOffset.systemDefault()).toLocalDateTime();
 
     testBuilder()
         .sqlQuery(query)
