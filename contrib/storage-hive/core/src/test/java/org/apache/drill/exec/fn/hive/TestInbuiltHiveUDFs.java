@@ -31,7 +31,6 @@ import org.apache.drill.exec.hive.HiveTestBase;
 import org.apache.drill.exec.server.options.OptionValue;
 import org.apache.drill.test.QueryTestUtil;
 import org.apache.drill.test.TestBuilder;
-import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 

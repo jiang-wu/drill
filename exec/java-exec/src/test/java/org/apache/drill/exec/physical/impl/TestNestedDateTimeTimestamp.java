@@ -20,10 +20,12 @@ package org.apache.drill.exec.physical.impl;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.TemporalAccessor;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,6 @@ import org.apache.drill.exec.expr.fn.impl.DateUtility;
 import org.apache.drill.exec.rpc.user.QueryDataBatch;
 import org.apache.drill.test.BaseTestQuery;
 import org.apache.drill.test.TestBuilder;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -203,15 +204,16 @@ public class TestNestedDateTimeTimestamp extends BaseTestQuery {
         long timeMillis[] = new long[]{864000000L, 3600L, 1521826852123L};
 
         for (int i = 0 ; i < timeMillis.length ; i++) {
-            DateTime time1 = new org.joda.time.DateTime(timeMillis[i], org.joda.time.DateTimeZone.UTC);
-            DateTime time2 = new DateTime(timeMillis[i], org.joda.time.DateTimeZone.UTC).withZoneRetainFields(org.joda.time.DateTimeZone.getDefault());
-            DateTime time3 = new DateTime(time2.getMillis()).withZoneRetainFields(org.joda.time.DateTimeZone.UTC);
-
-            Assert.assertEquals(time1.toString(), time3.toString());
-            Assert.assertEquals(time1.toString().substring(0,23), time2.toString().substring(0,23));
+            OffsetDateTime time1 = OffsetDateTime.ofInstant(Instant.ofEpochMilli(timeMillis[i]), ZoneOffset.UTC);
+            OffsetDateTime time2 = time1.toLocalDateTime().atZone(ZoneOffset.systemDefault()).toOffsetDateTime();
+            OffsetDateTime time3 = time2.toLocalDateTime().atOffset(ZoneOffset.UTC);
 
             System.out.println("time1 = " + time1 + ", time2 = " + time2 + ", time3 = " + time3);
-            System.out.println("  time1 = " + time1.toString().substring(0,23) + "\n  time2 = " + time2.toString().substring(0,23) + "\n  time3 = " + time3.toString().substring(0,23));
+            System.out.println("  time1 = " + time1.toString().substring(0,16) + "\n  time2 = " + time2.toString().substring(0,16) + "\n  time3 = " + time3.toString().substring(0,16));
+
+            Assert.assertEquals(time1.toString(), time3.toString());
+            Assert.assertEquals(time1.toString().substring(0,16), time2.toString().substring(0,16));
+
 
         }
     }

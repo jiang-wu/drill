@@ -21,14 +21,11 @@ import static org.apache.drill.test.TestBuilder.mapOf;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
 import org.apache.drill.test.BaseTestQuery;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.junit.Test;
 
